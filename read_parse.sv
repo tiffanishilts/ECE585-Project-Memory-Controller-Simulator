@@ -1,15 +1,29 @@
-module parse;
+import "DPI-C" function string getenv(input string env_name);
+
+module read_parse;
+
 initial begin 
 
 	int file;
 	int a; //address
-
+	string path; // file path
+	string file_name;
 	int c;	  // clk
 	int o;    // operation 
 	
+	
+	if($value$plusargs("TRACE=%s", file_name))
+		$display("Filename is: %s", file_name);
+	else
+	$display("File name retrieval unsuccessful");
+		
+	   
 
-	file = $fopen("./trace.txt", "r");
-	`ifdef VERBOSE
+	path = {getenv("PWD"),"/input/",file_name};                 
+
+	
+	file = $fopen(path, "r");
+	`ifdef DEBUG
 	   if(file)begin
 	      $display("file was opened successfully");
 	   end
@@ -20,7 +34,7 @@ initial begin
 
 
 	while($fscanf(file, "%d %d %h", c, o, a)==3)begin
-	`ifdef VERBOSE
+	`ifdef DEBUG
 	$display("Time=%d Operation=%d Address=%h", c, o, a);
 	`endif
 	end
@@ -28,3 +42,4 @@ initial begin
 	$fclose(file);
 end
 endmodule
+
