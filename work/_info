@@ -1,0 +1,35 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/Modeltech_pe_edu_10.4a/examples/ECE585_GroupThree-main
+vparse
+DXx6 sv_std 3 std 0 22 WmjPaeP=7F5?QFXzJ>D[Q2
+!s110 1604303397
+!i10b 1
+!s100 >6k25a_R9dO<LYZD<C8202
+I1Rdh0OfM=>jNUKCBF3S1k3
+VDg1SIo80bB@j0V0VzS_@n1
+!s105 read_parse_sv_unit
+S1
+R0
+w1604271909
+8read_parse.sv
+Fread_parse.sv
+L0 1
+OP;L;10.4a;61
+r1
+!s85 0
+31
+!s108 1604303397.000000
+!s107 read_parse.sv|
+!s90 -reportprogress|300|+define+VERBOSE|read_parse.sv|
+!s101 -O0
+!i113 1
+o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact -O0
+!s92 +define+VERBOSE -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact -O0
