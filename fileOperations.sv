@@ -13,7 +13,7 @@ module fileOperations;
 
         string file;                                                            // string variable for file name
 
-        int fd_r, clocks, operation, hexAddr;                                     // file descriptor for read operation, cpu clock cycles, operation, hexadecimal address
+        int fd_r, clocks, operation, hexAddr;                                   // file descriptor for read operation, cpu clock cycles, operation, hexadecimal address
 
         if ($value$plusargs ("FILENAME=%s", file))                              // attempt to get file name from command line
                                                                                 // user must specify input as: +FILENAME=filename OR +FILENAME="filename" exactly
@@ -28,9 +28,9 @@ module fileOperations;
         else
             $display ("File was NOT opened successfully: %0d", fd_r);           // 0 will display if failure
 
-        while ($fscanf (fd_r, "%d %d %x", clocks, operation, hexAddr) == 2)       // continue to read file until conversion failure or eof whichever is first
+        while ($fscanf (fd_r, "%d %d %x", clocks, operation, hexAddr) == 2)     // continue to read file until conversion failure or eof whichever is first
             begin
-                $display("%d %d %x", clocks, operation, hexaddr);                 // display each line to ensure proper parsing
+                $display("%d %d %x", clocks, operation, hexaddr);               // display each line to ensure proper parsing
             end
 
         $fclose(fd_r);                                                          // close file                                                 
