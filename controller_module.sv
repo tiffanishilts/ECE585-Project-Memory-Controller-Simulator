@@ -27,7 +27,7 @@ $display("----------------");
 $display("PUSHING IN QUEUE");
 $display("----------------");
 for(int i=0; i<16 ; i++) begin
-if(parser.GetTrace())begin
+if(parser.getInput())begin
    automatic que mn = '{parser.reference,trace_t'(parser.reference_type),address_t'(parser.address)};
   queue.push_back(mn);
   $display("request time %0d Operation= %0s address= %0h",queue[i][0],trace_t'(queue[i][1]),queue[i][2]);
@@ -40,7 +40,7 @@ $display("%p\n",queue);
 requestTime = queue[0][0];
 $display ("Request time = %0d",requestTime);
 $display("-----------------");
-$display("POPING FROM QUEUE");
+$display("POPPING FROM QUEUE");
 $display("-----------------\n");
 
 while(1) begin
@@ -53,7 +53,7 @@ end
 for(int i=0; i<=que_size ; i++) begin
 	
 	if(CPU_clock == requestTime)begin
-	$display("exicuiting instruction at %0d current time", CPU_clock);
+	$display("executing instruction at %0d current time", CPU_clock);
 	$display("request time %0d Operation= %0s address= %0h",queue[i][0],trace_t'(queue[i][1]),queue[i][2]);
 	pop = queue.pop_front;
   	$display("queue after pop:%p",queue);
@@ -66,7 +66,7 @@ for(int i=0; i<=que_size ; i++) begin
 end
 end
 
-parser.parseFile();
+//parser.parseFile();
 
 
 

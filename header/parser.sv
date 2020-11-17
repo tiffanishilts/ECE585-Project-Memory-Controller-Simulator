@@ -31,13 +31,13 @@ input_trace_file = $fopen(input_trace_path, "r");
 	end
 endtask
 
-function int GetTrace();
+function int getInput();
 	if($fscanf(input_trace_file, "%0d %0d %0h", reference, reference_type, address) == 3) begin
 		reference_count[reference_type]++;
 		return 1;
 	end
 	return 0;
-endfunction :  GetTrace
+endfunction :  getInput
 
 task parseFile();
 	while($fscanf(input_trace_file,"%0d %0d %0h", reference, operation, address)==3) begin
