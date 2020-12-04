@@ -40,21 +40,22 @@ module controller_module;
 
 
 initial begin
-parser.pasrseFileName();
+parser.parserFileName();
 parser.openFile();
 
-while(queue.size()!=0 || !$feof(parser.input_trace_file) ) begin:loop
+while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) begin:loop
 		if (queue.size()<=16)begin:full
 			
-			if (parser.getInput())
+			if (parser.getInput()) begin
+			
     			pendingRequest=1;
-    
+    			end
 		
 			if (pendingRequest) begin:pending
 				
-				
+			
 				if (queue.size()==0 && CPU_clock<parser.reference) begin:advancing
-					$display("request Time: %d",parser.reference);
+					
 				
        					if(parser.reference%2==0)begin
 					
@@ -77,12 +78,15 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) ) begin:loop
       				
 
       				if(CPU_clock>= parser.reference)begin
-
+				
       				automatic que operationQueue = '{parser.reference,trace_t'(parser.reference_type),address_t'(parser.address)};
+				$display("request Time: %d",parser.reference);
   				queue.push_back(operationQueue);
       				//$display("pushed in queue at %d",CPU_clock);
       				pendingRequest=0;
-      			
+      				operationEnable = 1;
+				
+				$display("queue= %0d", queue.size());
 				end
       			end:pending
 		
@@ -91,7 +95,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) ) begin:loop
 			if (CPU_clock%2==0)begin:process
 				
         
-				requestTime = queue[0][0];
+				if(operationEnable) begin:en
         			request = queue[0][1];
         			address = queue[0][2];
 			
@@ -113,6 +117,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) ) begin:loop
 				
 				$fclose(out);
 				pop = queue.pop_front;
+				$display("pop : %p",queue);
 			end
 			//Write
 			else if(request == 1)begin
@@ -134,6 +139,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) ) begin:loop
 				
 				$fclose(out);
 				pop = queue.pop_front;
+				$display("pop : %p",queue);
 			end
 			//Instruction Fetch
 			else if(request == 2)begin
@@ -154,6 +160,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) ) begin:loop
 				
 				$fclose(out);
 				pop = queue.pop_front;
+				$display("pop : %p",queue);
 			end
 			else begin
 			`ifdef DEBUG
@@ -161,10 +168,13 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) ) begin:loop
 			`endif
 			pop = queue.pop_front;
 			end
-  		
+  			end:en
 			DRAM_clock++;
+	
 		end:process
+		
 		CPU_clock++;
+		$display("time:%d",CPU_clock);
 		end:loop
 	end
 endmodule:controller_module
