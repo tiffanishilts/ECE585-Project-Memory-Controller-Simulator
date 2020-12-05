@@ -37,6 +37,8 @@ int out;			//variable for output file descriptor handle
 que queue [$:15];	//queue
 que pop ;
 int lastUsedRow = 0;
+int lastUsedBank;
+int lastUsedBankGroup;
 module controller_module;
 
 
@@ -109,7 +111,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 
 				out = $fopen("output.txt", "a");
 
-                if (lastUsedRow != address.row_address)
+                if((lastUsedRow != address.row_address) && (lastUsedBank != address.bank) && (lastUsedBankGroup != address.bank_group))
 
                 begin: notRecentlyAccessedRead 
 
@@ -126,6 +128,8 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				DRAM_clock=clocks.DRAM_clock;
 
                 lastUsedRow = address.row_address;
+                lastUsedBank = address.bank;
+                lastUsedBankGroup = address.bank_group;
 				
 				$fclose(out);
 				pop = queue.pop_front;
@@ -133,7 +137,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 
                 end: notRecentlyAccessedRead
 
-                if (lastUsedRow == address.row_address)
+                if((lastUsedRow == address.row_address) && (lastUsedBank == address.bank) && (lastUsedBankGroup == address.bank_group))
 
                 begin: recentlyAccessedRead
 
@@ -142,6 +146,8 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				DRAM_clock=clocks.DRAM_clock;
 
                 lastUsedRow = address.row_address;
+                lastUsedBank = address.bank;
+                lastUsedBankGroup = address.bank_group;
 				
 				$fclose(out);
 				pop = queue.pop_front;
@@ -159,11 +165,11 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 
 				out = $fopen("output.txt", "a");
 
-                if(lastUsedRow != address.row_address)
+                if((lastUsedRow != address.row_address) && (lastUsedBank != address.bank) && (lastUsedBankGroup != address.bank_group))
 
                 begin: notRecentlyAccessedWrite
 
-                clocks =dram.PRE(DRAM_clock,address.bank_group, address.bank);
+                clocks=dram.PRE(DRAM_clock,address.bank_group, address.bank);
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
 							
@@ -171,11 +177,13 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
 				
-				clocks =dram.WRITE(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
+				clocks=dram.WRITE(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
 				
-                lastUsedRow = address. row_address
+                lastUsedRow = address.row_address;
+                lastUsedBank = address.bank;
+                lastUsedBankGroup = address.bank_group;
 
 				$fclose(out);
 				pop = queue.pop_front;
@@ -183,7 +191,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 
                 end: notRecentlyAccessedWrite
 
-                if(lastUsedRow == address.row_address)
+                if((lastUsedRow == address.row_address) && (lastUsedBank == address.bank) && (lastUsedBankGroup == address.bank_group))
 
                 begin: recentlyAccessedWrite
 
@@ -191,7 +199,9 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
 				
-                lastUsedRow = address. row_address
+                lastUsedRow = address.row_address;
+                lastUsedBank = address.bank;
+                lastUsedBankGroup = address.bank_group;
 
 				$fclose(out);
 				pop = queue.pop_front;
@@ -210,7 +220,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 
 				out = $fopen("output.txt", "a");
 
-                if(lastUsedRow != address.row_address)
+                if((lastUsedRow != address.row_address) && (lastUsedBank != address.bank) && (lastUsedBankGroup != address.bank_group))
 
                 begin: notRecentlyAccessedInstructionFetch
 
@@ -227,6 +237,8 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				DRAM_clock=clocks.DRAM_clock;
 
                 lastUsedRow = address.row_address;
+                lastUsedBank = address.bank;
+                lastUsedBankGroup = address.bank_group;
 				
 				$fclose(out);
 				pop = queue.pop_front;
@@ -234,16 +246,17 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 
                 end: notRecentlyAccessedInstructionFetch
 
-                if(lastUsedRow == address.row_address)
+                if((lastUsedRow == address.row_address) && (lastUsedBank == address.bank) && (lastUsedBankGroup == address.bank_group))
 
                 begin: recentlyAccessedInstructionFetch
 
-                	
 				clocks =dram.READ(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
-
+                
                 lastUsedRow = address.row_address;
+                lastUsedBank = address.bank;
+                lastUsedBankGroup = address.bank_group;
 				
 				$fclose(out);
 				pop = queue.pop_front;
@@ -266,7 +279,7 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 		
 		CPU_clock++;
 		$display("time:%d",CPU_clock);
-        
+
 		end:loop
 
 	end
