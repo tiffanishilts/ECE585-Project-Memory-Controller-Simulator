@@ -10,7 +10,7 @@ int operation;
 int 	reference_type;
 int 	reference_count[9:0];
 
-task pasrseFileName();
+task parserFileName();
 	if(!$value$plusargs("TRACE=%s",trace_file_name))begin
 	  $error("No input trace file specified");
 	  $stop;

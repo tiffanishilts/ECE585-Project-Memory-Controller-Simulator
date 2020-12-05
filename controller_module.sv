@@ -36,6 +36,7 @@ int delayTime = 0;			// delay for each DRAM command
 int out;			//variable for output file descriptor handle
 que queue [$:15];	//queue
 que pop ;
+int lastUsedRow = 0;
 module controller_module;
 
 
@@ -99,10 +100,23 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
         			request = queue[0][1];
         			address = queue[0][2];
 			
-			if(request == 0)begin
-			// delayTime = 0;
+			// Read
+            if(request == 0)
+            
+            begin: read
+
+			    delayTime = 0;
+
 				out = $fopen("output.txt", "a");
-							
+
+                if (lastUsedRow != address.row_address)
+
+                begin: notRecentlyAccessedRead 
+
+                clocks =dram.PRE(DRAM_clock,address.bank_group, address.bank);
+				CPU_clock=clocks.CPU_clock;
+				DRAM_clock=clocks.DRAM_clock;
+
 				clocks=dram.ACT(DRAM_clock,address.bank_group, address.bank, address.row_address);
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
@@ -110,20 +124,48 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				clocks =dram.READ(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
-				
-				clocks =dram.PRE(DRAM_clock,address.bank_group, address.bank);
-				CPU_clock=clocks.CPU_clock;
-				DRAM_clock=clocks.DRAM_clock;
+
+                lastUsedRow = address.row_address;
 				
 				$fclose(out);
 				pop = queue.pop_front;
 				$display("pop : %p",queue);
-			end
+
+                end: notRecentlyAccessedRead
+
+                if (lastUsedRow == address.row_address)
+
+                begin: recentlyAccessedRead
+
+                clocks =dram.READ(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
+				CPU_clock=clocks.CPU_clock;
+				DRAM_clock=clocks.DRAM_clock;
+
+                lastUsedRow = address.row_address;
+				
+				$fclose(out);
+				pop = queue.pop_front;
+				$display("pop : %p",queue);
+
+                end: recentlyAccessedRead
+			end: read
+
 			//Write
-			else if(request == 1)begin
-			delayTime = 0;
+			else if(request == 1)
+
+            begin: write
+
+			    delayTime = 0;
 
 				out = $fopen("output.txt", "a");
+
+                if(lastUsedRow != address.row_address)
+
+                begin: notRecentlyAccessedWrite
+
+                clocks =dram.PRE(DRAM_clock,address.bank_group, address.bank);
+				CPU_clock=clocks.CPU_clock;
+				DRAM_clock=clocks.DRAM_clock;
 							
 				clocks=dram.ACT(DRAM_clock,address.bank_group, address.bank, address.row_address);
 				CPU_clock=clocks.CPU_clock;
@@ -133,18 +175,48 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
 				
-				clocks =dram.PRE(DRAM_clock,address.bank_group, address.bank);
-				CPU_clock=clocks.CPU_clock;
-				DRAM_clock=clocks.DRAM_clock;
-				
+                lastUsedRow = address. row_address
+
 				$fclose(out);
 				pop = queue.pop_front;
 				$display("pop : %p",queue);
-			end
+
+                end: notRecentlyAccessedWrite
+
+                if(lastUsedRow == address.row_address)
+
+                begin: recentlyAccessedWrite
+
+                clocks =dram.WRITE(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
+				CPU_clock=clocks.CPU_clock;
+				DRAM_clock=clocks.DRAM_clock;
+				
+                lastUsedRow = address. row_address
+
+				$fclose(out);
+				pop = queue.pop_front;
+				$display("pop : %p",queue);
+
+                end: recentlyAccessedWrite
+
+			end: write
+
 			//Instruction Fetch
-			else if(request == 2)begin
+			else if(request == 2)
+
+            begin: instructionFetch
+
 				delayTime = 0;
+
 				out = $fopen("output.txt", "a");
+
+                if(lastUsedRow != address.row_address)
+
+                begin: notRecentlyAccessedInstructionFetch
+
+                clocks =dram.PRE(DRAM_clock,address.bank_group, address.bank);
+				CPU_clock=clocks.CPU_clock;
+				DRAM_clock=clocks.DRAM_clock;
 				
 				clocks=dram.ACT(DRAM_clock,address.bank_group, address.bank, address.row_address);
 				CPU_clock=clocks.CPU_clock;
@@ -153,15 +225,34 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 				clocks =dram.READ(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
 				CPU_clock=clocks.CPU_clock;
 				DRAM_clock=clocks.DRAM_clock;
-				
-				clocks =dram.PRE(DRAM_clock,address.bank_group, address.bank);
-				CPU_clock=clocks.CPU_clock;
-				DRAM_clock=clocks.DRAM_clock;
+
+                lastUsedRow = address.row_address;
 				
 				$fclose(out);
 				pop = queue.pop_front;
 				$display("pop : %p",queue);
-			end
+
+                end: notRecentlyAccessedInstructionFetch
+
+                if(lastUsedRow == address.row_address)
+
+                begin: recentlyAccessedInstructionFetch
+
+                	
+				clocks =dram.READ(DRAM_clock,address.bank_group, address.bank,  address.high_column_address);
+				CPU_clock=clocks.CPU_clock;
+				DRAM_clock=clocks.DRAM_clock;
+
+                lastUsedRow = address.row_address;
+				
+				$fclose(out);
+				pop = queue.pop_front;
+				$display("pop : %p",queue);
+
+                end: recentlyAccessedInstructionFetch
+
+			end: instructionFetch
+
 			else begin
 			`ifdef DEBUG
 			$display("Invalid Operation");
@@ -175,6 +266,9 @@ while(queue.size()!=0 || !$feof(parser.input_trace_file) || pendingRequest ) beg
 		
 		CPU_clock++;
 		$display("time:%d",CPU_clock);
+        
 		end:loop
+
 	end
+
 endmodule:controller_module
