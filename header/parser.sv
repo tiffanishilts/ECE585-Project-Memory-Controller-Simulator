@@ -1,7 +1,13 @@
 import "DPI-C" function string getenv(input string env_name);
 class Parser;
-parameter ADDR_W 	= 33;
-typedef logic [ADDR_W-1		: 0]	address_t;
+typedef struct packed {
+bit[15:0] row_address;
+bit [6:0] hight_column_address;
+bit [1:0] bank;
+bit [1:0] bank_group;
+bit [2:0] colum;
+bit [2:0] unused;
+}	address_t;
 string trace_file_name, input_trace_path;
 int input_trace_file;
 address_t address;
@@ -33,23 +39,10 @@ input_trace_file = $fopen(input_trace_path, "r");
 endtask
 
 function int getInput();
-	//$fscanf(input_trace_file, "%0h",add);
-	/*if($fscanf(input_trace_file, "%d %d %s", reference, reference_type, add) == 3) begin
-		if (str.len(add)==9) begin
-			if (add[0]=='1'||add[0]=='0')begin
-			$display("valid address");
-			address = atoi(add); 
-			end
-			else begin
-			$error("");
-			return 0;
-			end		//reference_count[reference_type]++;
-					//return 1;
-		end
-	end*/
-//$display("address:%h",add);
+	
+	
+
 	if($fscanf(input_trace_file, "%0d %0d %0h", reference, reference_type, address) == 3) begin
-		//$display("size of address, %d", $bits(address));
 		reference_count[reference_type]++;
 		return 1;
 	end
